@@ -13,22 +13,22 @@ window.geometry("900x750")
 
 def getimg1():
     global file_path1
-    file_path1 = filedialog.askopenfilename(title='选择图片1', filetypes=[(('JPG', '*.jpg')), ('All Files', '*')])
+    file_path1 = filedialog.askopenfilename(title='select', filetypes=[(('JPG', '*.jpg')), ('All Files', '*')])
     img = Image.open(file_path1)
     width, height = img.size
-    if img.width/img.height>=4/3:   #图片比例大于4：3
-        img = img.resize((400, int(400/width*height)))   #限制宽度
+    if img.width/img.height>=4/3:   
+        img = img.resize((400, int(400/width*height)))   
     else:
-        img = img.resize((int(300/height*width), 300))   #限制高度
+        img = img.resize((int(300/height*width), 300))   
 
     global photo1
     photo1 = ImageTk.PhotoImage(img)
-    img01.configure(image = photo1,width=400,height=300)   #显示
+    img01.configure(image = photo1,width=400,height=300)  
     img01.image = photo1
 
 def getimg2():
     global file_path2
-    file_path2 = filedialog.askopenfilename(title='选择图片2', filetypes=[(('JPG', '*.jpg')), ('All Files', '*')])
+    file_path2 = filedialog.askopenfilename(title='select', filetypes=[(('JPG', '*.jpg')), ('All Files', '*')])
     img = Image.open(file_path2)
     width, height = img.size
         
@@ -69,10 +69,10 @@ def save():
 
 def detect(image):
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    sift = cv2.xfeatures2d.SIFT_create()   #SIFT
+    sift = cv2.xfeatures2d.SIFT_create()   
     (kps, feat) = sift.detectAndCompute(grey, None)
     kps = np.float32([kp.pt for kp in kps])
-    return kps, feat  #特征点集和描述特征
+    return kps, feat  
 
 def match(kpsA, kpsB, featA, featB, ratio, reprojThresh):
     matcher = cv2.DescriptorMatcher_create("BruteForce")       
@@ -81,25 +81,25 @@ def match(kpsA, kpsB, featA, featB, ratio, reprojThresh):
 
     for m in knnMatches:
         if len(m) == 2 and m[0].distance < m[1].distance * ratio:
-            matches.append((m[0].trainIdx, m[0].queryIdx))   #存储索引值
+            matches.append((m[0].trainIdx, m[0].queryIdx))   
 
     if len(matches) > 4:
-        A = np.float32([kpsA[i] for (_, i) in matches])   #坐标
+        A = np.float32([kpsA[i] for (_, i) in matches])  
         B = np.float32([kpsB[i] for (i, _) in matches])
-        (H, status) = cv2.findHomography(A, B, cv2.RANSAC, reprojThresh)   #视角变换矩阵
+        (H, status) = cv2.findHomography(A, B, cv2.RANSAC, reprojThresh)   
         return (matches, H, status)
     return None
     
 def stitch(images, ratio=0.75, reprojThresh=4.0, showMatches=False):
     (imgB, imgA) = images
-    (kpsA, featA) = detect(imgA)   #检测特征点
+    (kpsA, featA) = detect(imgA)   
     (kpsB, featB) = detect(imgB)
-    M = match(kpsA, kpsB, featA, featB, ratio, reprojThresh)   #匹配
-    if M is None:   #不匹配
+    M = match(kpsA, kpsB, featA, featB, ratio, reprojThresh)  
+    if M is None:   
         return None
     (matches, H, status) = M
-    result = cv2.warpPerspective(imgA, H, (imgA.shape[1] + imgB.shape[1], imgA.shape[0]))   #图2视角变换
-    result[0:imgB.shape[0], 0:imgB.shape[1]] = imgB   #图1放在图片左端
+    result = cv2.warpPerspective(imgA, H, (imgA.shape[1] + imgB.shape[1], imgA.shape[0]))   
+    result[0:imgB.shape[0], 0:imgB.shape[1]] = imgB   
     return result
 
 global photo1
@@ -110,7 +110,7 @@ fr01.grid(column=0, row=0)
 fr01.place(x=20,y=20)
 img01=Label(fr01,image=photo1,width=56,height=17,background="white")
 img01.pack()
-btn01 = Button(window, text='打开',width=6,command=getimg1,relief=GROOVE)
+btn01 = Button(window, text='Open',width=6,command=getimg1,relief=GROOVE)
 btn01.grid(column=0, row=1)
 btn01.place(x=200,y=332)
 
@@ -122,11 +122,11 @@ fr02.grid(column=1, row=0)
 fr02.place(x=480,y=20)
 img02=Label(fr02,image=photo2,width=56,height=17,background="white")
 img02.pack()
-btn02 = Button(window, text='打开',width=6,command=getimg2,relief=GROOVE)
+btn02 = Button(window, text='Open',width=6,command=getimg2,relief=GROOVE)
 btn02.grid(column=1, row=1)
 btn02.place(x=650,y=332)
 
-btn03=Button(window,text='拼接',width=7,command=stitchimg,relief=GROOVE)
+btn03=Button(window,text='Stitch',width=7,command=stitchimg,relief=GROOVE)
 btn03.grid(column=2, row=1)
 btn03.place(x=420,y=335)
 
@@ -138,7 +138,7 @@ fr03.place(x=20,y=376)
 img03=Label(fr03,image=photo3,width=122,height=18,background="white")
 img03.pack()
 
-btn04=Button(window,text='保存',width=7,command=save,relief=GROOVE)
+btn04=Button(window,text='Save',width=7,command=save,relief=GROOVE)
 btn04.grid(column=2, row=3)
 btn04.place(x=420,y=705)
 
